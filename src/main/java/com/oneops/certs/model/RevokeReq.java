@@ -3,37 +3,26 @@ package com.oneops.certs.model;
 import com.google.auto.value.AutoValue;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import javax.annotation.Nullable;
 
 /**
- * appId: Application id requesting certificate management system to perform create certificate rest
- * web service call. commonName: Common name of the certificate to renew. teamDL: Team email
- * distribution list set up in the certificate management system, which owns the certificate.
- * disable: (Optional) Boolean value determining whether to disable the certificate. reason:
- * (Optional) Integer value giving the reason for the revoke.
+ * Certificate revocation request.
  *
- * <p>Accepted format values:
- *
- * <p>0 = None 1 = User key compromised 2 = CA key compromised 3 = User changed affiliation 4 =
- * Certificate superseded 5 = Original use no longer valid
- *
- * <p>verbose: This is an optional boolean field, that when set to true will allow for more
- * informative responses.
+ * @author Suresh
  */
 @AutoValue
-public abstract class RevokeReq {
+public abstract class RevokeReq extends GenericRequest {
 
-  public abstract String appId();
+  @Nullable
+  public abstract Boolean disable();
 
-  public abstract String commonName();
+  @Nullable
+  public abstract RevokeReason reason();
 
-  public abstract String teamDL();
-
-  public abstract String diable();
-
-  public abstract String reason();
+  public abstract Builder toBuilder();
 
   public static Builder builder() {
-    return new AutoValue_RevokeReq.Builder();
+    return new AutoValue_RevokeReq.Builder().verbose(true).disable(true).reason(RevokeReason.NONE);
   }
 
   @AutoValue.Builder
@@ -45,9 +34,13 @@ public abstract class RevokeReq {
 
     public abstract Builder teamDL(String teamDL);
 
-    public abstract Builder diable(String diable);
+    public abstract Builder alternateId(String alternateId);
 
-    public abstract Builder reason(String reason);
+    public abstract Builder verbose(Boolean verbose);
+
+    public abstract Builder disable(Boolean disable);
+
+    public abstract Builder reason(RevokeReason reason);
 
     public abstract RevokeReq build();
   }

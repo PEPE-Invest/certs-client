@@ -1,35 +1,23 @@
 package com.oneops.certs.model;
 
 import com.google.auto.value.AutoValue;
+import com.squareup.moshi.Json;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import javax.annotation.Nullable;
 
 @AutoValue
-public abstract class RevokeRes {
+public abstract class RevokeRes extends GenericResponse {
 
-  public abstract String Success();
+  @Nullable
+  @Json(name = "Revoked")
+  public abstract Boolean revoked();
 
-  public abstract String Revoked();
-
-  public abstract String Requested();
+  @Nullable
+  @Json(name = "Requested")
+  public abstract Boolean requested();
 
   public static JsonAdapter<RevokeRes> jsonAdapter(Moshi moshi) {
     return new AutoValue_RevokeRes.MoshiJsonAdapter(moshi);
-  }
-
-  public static Builder builder() {
-    return new AutoValue_RevokeRes.Builder();
-  }
-
-  @AutoValue.Builder
-  public abstract static class Builder {
-
-    public abstract Builder Success(String Success);
-
-    public abstract Builder Revoked(String Revoked);
-
-    public abstract Builder Requested(String Requested);
-
-    public abstract RevokeRes build();
   }
 }

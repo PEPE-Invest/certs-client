@@ -11,7 +11,10 @@ import com.oneops.certs.model.ExpirationRes;
 import com.oneops.certs.model.ExpiringReq;
 import com.oneops.certs.model.ExpiringRes;
 import com.oneops.certs.model.RenewReq;
+import com.oneops.certs.model.RevokeReq;
+import com.oneops.certs.model.RevokeRes;
 import com.oneops.certs.model.SerialNumberRes;
+import com.oneops.certs.model.ViewRes;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
@@ -46,7 +49,10 @@ public interface CertWebService {
 
   @POST("/certificate/exists")
   Call<ExistsRes> exists(@Body CwsRequest req);
-  //
-  //  @POST("/certificate/revoke")
-  //  Call<Result<RevokeRes>> revoke(@Body RevokeReq req);
+
+  @POST("/certificate/view")
+  Call<ViewRes> view(@Body CwsRequest req);
+
+  @POST("/certificate/revoke")
+  Call<RevokeRes> revoke(@Body RevokeReq req);
 }

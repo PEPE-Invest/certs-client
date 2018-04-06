@@ -59,20 +59,6 @@ public abstract class DownloadReq extends GenericRequest {
   @Nullable
   public abstract String certificateData();
 
-  /**
-   * This is an optional field which can specify who specifically made the request if the appId is
-   * owned by a team or group.
-   */
-  @Nullable
-  public abstract String alternateId();
-
-  /**
-   * This is an optional boolean field, that when set to true will allow for more informative
-   * responses.
-   */
-  @Nullable
-  public abstract Boolean verbose();
-
   public abstract Builder toBuilder();
 
   public static Builder builder() {

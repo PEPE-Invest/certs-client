@@ -13,6 +13,7 @@ import com.oneops.certs.model.CwsResponse;
 import com.oneops.certs.model.DateAdapter;
 import com.oneops.certs.model.DownloadReq;
 import com.oneops.certs.model.DownloadRes;
+import com.oneops.certs.model.ExistsRes;
 import com.oneops.certs.model.ExpirationRes;
 import com.oneops.certs.model.ExpiringReq;
 import com.oneops.certs.model.ExpiringRes;
@@ -20,8 +21,11 @@ import com.oneops.certs.model.GenericResponse;
 import com.oneops.certs.model.JsonAdapterFactory;
 import com.oneops.certs.model.Redacted;
 import com.oneops.certs.model.RenewReq;
+import com.oneops.certs.model.RevokeReason;
+import com.oneops.certs.model.RevokeReq;
+import com.oneops.certs.model.RevokeRes;
 import com.oneops.certs.model.SerialNumberRes;
-import com.oneops.certs.tls.DelegatingSSLSocketFactory;
+import com.oneops.certs.model.ViewRes;
 import com.squareup.moshi.Moshi;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +40,7 @@ import javax.annotation.Nullable;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -102,15 +106,18 @@ public abstract class CwsClient {
   private CertWebService certWebService;
 
   /**
-   * Initializes the TLS retrofit client. Uses {@link DelegatingSSLSocketFactory} to enabled client
-   * auth mode.
+   * Initializes the TLS retrofit client.
    *
    * @throws GeneralSecurityException if any error initializing the TLS context.
    */
   private void init() throws GeneralSecurityException {
     log.info("Initializing " + toString());
     Moshi moshi =
-        new Moshi.Builder().add(JsonAdapterFactory.create()).add(new DateAdapter()).build();
+        new Moshi.Builder()
+            .add(JsonAdapterFactory.create())
+            .add(new DateAdapter())
+            .add(new RevokeReason.Adapter())
+            .build();
 
     KeyStore keystore = loadKeystore();
     TrustManager[] trustManagers = initTrustManager(keystore);
@@ -118,14 +125,7 @@ public abstract class CwsClient {
 
     SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
     sslContext.init(keyManagers, trustManagers, new SecureRandom());
-    DelegatingSSLSocketFactory socketFactory =
-        new DelegatingSSLSocketFactory(sslContext.getSocketFactory()) {
-          @Override
-          protected SSLSocket configureSocket(SSLSocket sslSocket) throws IOException {
-            sslSocket.setUseClientMode(true);
-            return super.configureSocket(sslSocket);
-          }
-        };
+    SSLSocketFactory socketFactory = sslContext.getSocketFactory();
 
     OkHttpClient.Builder okBuilder =
         new OkHttpClient()
@@ -340,6 +340,7 @@ public abstract class CwsClient {
             .teamDL(normalizeTeamDL(teamDLName))
             .subjectAltName(subjectAltNames)
             .commonName(commonName)
+            .domain(domain())
             .build();
     return createCert(req).certificateDN();
   }
@@ -448,10 +449,10 @@ public abstract class CwsClient {
    * @param password The password to protect the private key. Password complexity requires between
    *     12 and 100 characters and at least one of each the following:
    *     <pre>
-   *        <li> Uppercase character
-   *        <li>Lowercase character
-   *        <li>Special character
-   *        <li>Number
+   *        * Uppercase character
+   *        * Lowercase character
+   *        * Special character
+   *        * Number
    *      </pre>
    *
    * @param format {@link CertFormat} The format in which the certificate should be returned.
@@ -566,5 +567,100 @@ public abstract class CwsClient {
             .expirationWindow(String.valueOf(days))
             .build();
     return certExpiring(req).certificateExpiring();
+  }
+
+  /**
+   * Checks whether the certificate exists.
+   *
+   * @param req {@link CwsRequest}
+   * @return {@link ExistsRes}
+   * @throws IOException throws if PolicyDN doesn't exist or any communication error to the service.
+   */
+  public ExistsRes certExists(CwsRequest req) throws IOException {
+    return exec(certWebService.exists(req));
+  }
+
+  /**
+   * Checks whether the certificate with given common name exists.
+   *
+   * @param commonName cert common name
+   * @param teamDLName The team DL, which can be absolute/relative to the base {@link #teamDL()}.
+   * @return <code>true</code> if cert exists, else return <code>false</code>.
+   * @throws IOException throws if PolicyDN doesn't exist or any communication error to the service.
+   */
+  public boolean certExists(String commonName, String teamDLName) throws IOException {
+    CwsRequest req =
+        CwsRequest.builder()
+            .appId(appId())
+            .teamDL(normalizeTeamDL(teamDLName))
+            .commonName(commonName)
+            .build();
+    return certExists(req).certificateExists();
+  }
+
+  /**
+   * Returns information about the certificate if it exists.
+   *
+   * @param req {@link CwsRequest}
+   * @return {@link ViewRes}
+   * @throws IOException throws if certificate/PolicyDN doesn't exist or any communication error to
+   *     the service.
+   */
+  public ViewRes viewCert(CwsRequest req) throws IOException {
+    return exec(certWebService.view(req));
+  }
+
+  /**
+   * Returns information about the given certificate if it exists.
+   *
+   * @param commonName cert common name
+   * @param teamDLName The team DL, which can be absolute/relative to the base {@link #teamDL()}.
+   * @return {@link ViewRes}
+   * @throws IOException throws if PolicyDN doesn't exist or any communication error to the service.
+   */
+  public ViewRes viewCert(String commonName, String teamDLName) throws IOException {
+    CwsRequest req =
+        CwsRequest.builder()
+            .appId(appId())
+            .teamDL(normalizeTeamDL(teamDLName))
+            .commonName(commonName)
+            .build();
+    return viewCert(req);
+  }
+
+  /**
+   * Revoke and disables certificate under a certain team DL.
+   *
+   * @param req {@link RevokeReq}
+   * @return {@link RevokeRes}
+   * @throws IOException throws if certificate/PolicyDN doesn't exist or any communication error to
+   *     the service.
+   */
+  public RevokeRes revokeCert(RevokeReq req) throws IOException {
+    return exec(certWebService.revoke(req));
+  }
+
+  /**
+   * Revokes certificate under a certain team DL.
+   *
+   * @param commonName cert common name
+   * @param teamDLName The team DL, which can be absolute/relative to the base {@link #teamDL()}.
+   * @param reason Reason for the revoke.
+   * @param disable Also disable the certificate.
+   * @return {@link ViewRes}
+   * @throws IOException throws if PolicyDN doesn't exist or any communication error to the service.
+   */
+  public RevokeRes revokeCert(
+      String commonName, String teamDLName, RevokeReason reason, boolean disable)
+      throws IOException {
+    RevokeReq req =
+        RevokeReq.builder()
+            .appId(appId())
+            .teamDL(normalizeTeamDL(teamDLName))
+            .commonName(commonName)
+            .reason(reason)
+            .disable(disable)
+            .build();
+    return revokeCert(req);
   }
 }
