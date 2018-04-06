@@ -3,27 +3,40 @@ package com.oneops.certs.model;
 import com.google.auto.value.AutoValue;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import javax.annotation.Nullable;
 
 /**
- * appId: Application id requesting certificate management system to perform create certificate rest web service call.
- * commonName: Common name of the certificate to renew.
- * teamDL: Team email distribution list set up in the certificate management system, which owns the certificate.
- * csr: This is an optional filed if the key pair has already been created and the csr needs to be signed.
- * alternateId: This is an optional field which can specify who specifically made the request if the appId is owned by a team or group.
+ * Certs renew request.
+ *
+ * @author Suresh
  */
 @AutoValue
-public abstract class RenewReq {
+public abstract class RenewReq extends GenericRequest {
 
-  public abstract String appId();
+  /**
+   * This is an optional filed if the key pair has already been created and the csr needs to be
+   * signed.
+   */
+  @Nullable
+  public abstract String csr();
 
-  public abstract String commonName();
+  public abstract Builder toBuilder();
 
-  public abstract String teamDL();
-
-  public static Builder builder() {
-    return new AutoValue_RenewReq.Builder();
+  /**
+   * Creates a cert renew request with the given details.
+   *
+   * @param appId Application id
+   * @param commonName Cert common name
+   * @param teamDL Team email DL.
+   * @return {@link RenewReq}
+   */
+  public static RenewReq create(String appId, String commonName, String teamDL) {
+    return builder().appId(appId).commonName(commonName).teamDL(teamDL).build();
   }
 
+  public static Builder builder() {
+    return new AutoValue_RenewReq.Builder().verbose(true);
+  }
 
   @AutoValue.Builder
   public abstract static class Builder {
@@ -33,6 +46,12 @@ public abstract class RenewReq {
     public abstract Builder commonName(String commonName);
 
     public abstract Builder teamDL(String teamDL);
+
+    public abstract Builder csr(String csr);
+
+    public abstract Builder alternateId(String alternateId);
+
+    public abstract Builder verbose(Boolean verbose);
 
     public abstract RenewReq build();
   }
