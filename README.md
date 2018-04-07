@@ -1,11 +1,9 @@
-<div>
-
-<img src="docs/images/tls-certificate-64.png" alt="Cert" width=25 height=25> Certificate Web Service Client [![Maven Central](https://img.shields.io/maven-central/v/com.oneops/certs-client.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.oneops%22%20AND%20a%3A%22certs-client%22) [![changelog][cl-svg]][cl-url] [![javadoc][javadoc-svg]][javadoc-url]  
-------
+<img src="docs/images/tls-certificate-64.png" alt="Cert" width=25 height=25> Certificate Web Service Client 
+----------
+[![Maven Central](https://img.shields.io/maven-central/v/com.oneops/certs-client.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.oneops%22%20AND%20a%3A%22certs-client%22) [![changelog][cl-svg]][cl-url] [![javadoc][javadoc-svg]][javadoc-url]  
 
 A  java API for Certificate Web Service.
- 
-</div>
+
 
 Download
 --------
