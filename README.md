@@ -18,7 +18,7 @@ Download [the latest JAR][1] or grab via Maven:
 
 ## Examples
 
-##### Initializing CWS Client
+#### Initializing CWS Client
 
 ```java
 CwsClient client = CwsClient.builder()
@@ -31,7 +31,7 @@ CwsClient client = CwsClient.builder()
 ```
 For loading the keystore from classpath use, `classpath:/<your/cws/keystore/path>.p12`
 
-##### Create new cert
+#### Create new cert
 
 ```java
 String cn = "test1.domain.com" ;
@@ -41,44 +41,56 @@ List<String> sans = Arrays.asList("san1.domain.com","san1.domain.com");
 String certName = client.createCert(cn,sans, teamDL);
 ```
 
-##### Check cert exists
+#### Check cert exists
 
 ```java
 boolean exists = client.certExists(cn, teamDL);
 ```
 
-##### Download cert
+#### Download cert
 
 ```java
 String base64Content = client.downloadCert(cn, teamDL, "test1@Eeweweesd", CertFormat.PKCS12);
    
 ```
 
-##### Get cert expiration date
+#### Get cert expiration date
 
 ```java
 LocalDateTime date = client.getCertExpirationDate(cn, teamDL);
 ```
 
-##### View cert details
+#### View cert details
 
 ```java
 ViewRes viewRes = client.viewCert(cn, teamDL);
 ```
 
 
-##### Revoke and disable the cert
+#### Revoke and disable the cert
 
 ```java
 RevokeRes revokeRes = client.revokeCert(cn, teamDL, RevokeReason.NONE, true);
 ```
 
-##### Delete cert
+#### Delete cert
 
 ```java
 client.obsoleteCert(cn, teamDL);
 ```
-  
+
+## Testing
+
+Set the following env variables and run the `./mvnw clean test` to execute the unit tests.
+
+```bash
+ export cws_host=...     
+ export cws_app_id=...
+ export cws_team_dl=....
+ export cws_domain=...
+ export cws_keystore=.....p12
+ export cws_keystore_pass=....
+```
 <!-- Badges -->
 
 [1]: https://search.maven.org/remote_content?g=com.oneops&a=certs-client&v=LATEST
