@@ -1,6 +1,6 @@
 <img src="docs/images/tls-certificate-64.png" alt="Cert" width=25 height=25> Certificate Web Service Client 
 ----------
-[![Maven Central](https://img.shields.io/maven-central/v/com.oneops/certs-client.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.oneops%22%20AND%20a%3A%22certs-client%22) [![changelog][cl-svg]][cl-url] [![javadoc][javadoc-svg]][javadoc-url]  
+[![Maven Central][maven-svg]][maven-url] [![changelog][cl-svg]][cl-url] [![javadoc][javadoc-svg]][javadoc-url]  
 
 A  java API for Certificate Web Service.
 
@@ -118,6 +118,9 @@ License
 <!-- Badges -->
 
 [1]: https://search.maven.org/remote_content?g=com.oneops&a=certs-client&v=LATEST
+
+[maven-url]: http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.oneops%22%20AND%20a%3A%22certs-client%22
+[maven-svg]: https://img.shields.io/maven-central/v/com.oneops/certs-client.svg?label=Maven%20Central&style=flat-square
 
 [cl-url]: https://github.com/oneops/certs-client/blob/master/CHANGELOG.md
 [cl-svg]: https://img.shields.io/badge/change--log-latest-blue.svg?style=flat-square
