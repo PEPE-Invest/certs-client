@@ -1,8 +1,10 @@
-# :lock: Certificate Web Service Client
+<div align="center">
 
+# <img src="docs/images/tls-certificate-64.png" alt="Cert" width=25 height=25> Certificate Web Service Client
 [![Maven Central](https://img.shields.io/maven-central/v/com.oneops/certs-client.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.oneops%22%20AND%20a%3A%22certs-client%22) [![changelog][cl-svg]][cl-url] [![javadoc][javadoc-svg]][javadoc-url]  
 
-A pure java API for Certificate Web Service. 
+A  java API for Certificate Web Service. 
+</div>
 
 Download
 --------
@@ -36,7 +38,7 @@ For loading the keystore from classpath use, `classpath:/<your/cws/keystore/path
 ```java
 String cn = "test1.domain.com" ;
 String teamDL = "test-teamDL"; // Relative to Base TeamDL.
-List<String> sans = Arrays.asList("san1.domain.com","san1.domain.com");
+List<String> sans = Arrays.asList("app1.domain.com","app2.domain.com");
     
 String certName = client.createCert(cn,sans, teamDL);
 ```
@@ -90,6 +92,30 @@ Set the following env variables and run the `./mvnw clean test` to execute the u
  export cws_keystore=.....p12
  export cws_keystore_pass=....
 ```
+
+## Dependencies
+
+   - [Retrofit](https://github.com/square/retrofit/)
+   - [OkHttp](https://github.com/square/okhttp)
+   - [Moshi](https://github.com/square/Moshi/)
+
+License
+-------
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+
+
 <!-- Badges -->
 
 [1]: https://search.maven.org/remote_content?g=com.oneops&a=certs-client&v=LATEST
