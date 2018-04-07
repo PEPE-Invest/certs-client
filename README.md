@@ -51,7 +51,6 @@ boolean exists = client.certExists(cn, teamDL);
 
 ```java
 String base64Content = client.downloadCert(cn, teamDL, "test1@Eeweweesd", CertFormat.PKCS12);
-   
 ```
 
 #### Get cert expiration date
