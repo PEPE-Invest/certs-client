@@ -2,7 +2,7 @@
 ----------
 [![Maven Central][maven-svg]][maven-url] [![changelog][cl-svg]][cl-url] [![javadoc][javadoc-svg]][javadoc-url]  
 
-A  java API for Certificate Web Service.
+A java API for Certificate Web Service.
 
 
 Download
@@ -30,9 +30,16 @@ CwsClient client = CwsClient.builder()
             .storePassword("Keystore password")
             .build();
 ```
-For loading the keystore from classpath use, `classpath:/<your/cws/keystore/path>.p12`
+> Keystore should be of type `PKCS#12` format. 
+> For loading the keystore from classpath use, `classpath:/<your/cws/keystore/path>.p12`
 
-#### Create new cert
+In order to create a `PKCS#12(.p12)` keystore from PEM/DER encoded certificate, use the following `openssl` command.
+
+```bash
+$ openssl pkcs12 -export -chain -out cws-keystore.p12 -inkey private.key -in client.crt -CAfile cacert.crt
+```
+
+#### Create new certificate
 
 ```java
 String cn = "test1.domain.com" ;
@@ -42,38 +49,44 @@ List<String> sans = Arrays.asList("app1.domain.com","app2.domain.com");
 String certName = client.createCert(cn,sans, teamDL);
 ```
 
-#### Check cert exists
+#### Check certificate exists
 
 ```java
 boolean exists = client.certExists(cn, teamDL);
 ```
 
-#### Download cert
+#### Download certificate
 
 ```java
 String base64Content = client.downloadCert(cn, teamDL, "test1@Eeweweesd", CertFormat.PKCS12);
 ```
 
-#### Get cert expiration date
+#### Get certificate expiration date
 
 ```java
 LocalDateTime date = client.getCertExpirationDate(cn, teamDL);
 ```
 
-#### View cert details
+#### View certificate details
 
 ```java
 ViewRes viewRes = client.viewCert(cn, teamDL);
 ```
 
 
-#### Revoke and disable the cert
+#### Revoke and disable the certificate
 
 ```java
 RevokeRes revokeRes = client.revokeCert(cn, teamDL, RevokeReason.NONE, true);
 ```
 
-#### Delete cert
+#### Renew certificate
+
+```java
+boolean success = client.renewCert(cn, teamDL);
+```
+
+#### Delete certificate
 
 ```java
 client.obsoleteCert(cn, teamDL);
@@ -81,7 +94,7 @@ client.obsoleteCert(cn, teamDL);
 
 ## Testing
 
-Set the following env variables and run the `./mvnw clean test` to execute the unit tests.
+Set the following env variables and run `./mvnw clean test` to execute the unit tests.
 
 ```bash
  export cws_host=...     

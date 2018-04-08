@@ -97,7 +97,7 @@ public abstract class CwsClient {
   @Redacted
   public abstract String storePassword();
 
-  /** Enable http curl logging for debugging. */
+  /** Enable http logging for debugging. */
   public abstract boolean debug();
 
   /** Connection/read/write timeout. */
