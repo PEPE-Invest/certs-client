@@ -23,21 +23,23 @@ Download [the latest JAR][1] or grab via Maven:
 
 ```java
 CwsClient client = CwsClient.builder()
-            .endPoint("Api Endpoint")
-            .appId("App ID")
-            .teamDL("Base Team DL")
+            .endPoint("Api Endpoint") 
+            .appId("App ID")               
+            .teamDL("Base Team DL")             
             .keystore("Keystore Path")
             .storePassword("Keystore password")
             .build();
 ```
-> Keystore should be of type `PKCS#12` format. 
-> For loading the keystore from classpath use, `classpath:/<your/cws/keystore/path>.p12`
+- Keystore should be of type `PKCS#12` format. 
+- For loading the keystore from classpath use, `classpath:/<your/cws/keystore/path>.p12`
+- To enable http debugging for troubleshooting, add `.debug(true)`  to the `CwsClient.builder()`
+- In order to create a `PKCS#12(.p12)` keystore from PEM/DER encoded certificate, use the following `openssl` command.
 
-In order to create a `PKCS#12(.p12)` keystore from PEM/DER encoded certificate, use the following `openssl` command.
-
-```bash
-$ openssl pkcs12 -export -chain -out cws-keystore.p12 -inkey private.key -in client.crt -CAfile cacert.crt
-```
+  ```bash
+  $ openssl pkcs12 -export -chain -out cws-keystore.p12 -inkey private.key -in client.crt -CAfile cacert.crt
+  # Java keystore hack to explicity add cacert.crt trustore entity.
+  $ keytool -import -trustcacerts -file cacert.crt -keystore cws-keystore.p12
+  ```
 
 #### Create new certificate
 
