@@ -21,5 +21,5 @@ public enum CertFormat {
   PKCS7,
 
   @Json(name = "base64pkcs#8")
-  BASE64_PKCS8;
+  BASE64_PKCS8
 }
