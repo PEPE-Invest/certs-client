@@ -33,7 +33,7 @@ class CWSClientTest {
             .appId(CwsConfig.appId())
             .teamDL(CwsConfig.teamDL())
             .keystore(CwsConfig.keystore())
-            .storePassword(CwsConfig.password())
+            .keystorePassword(CwsConfig.password())
             .build();
   }
 

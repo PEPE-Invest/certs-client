@@ -26,6 +26,7 @@ import com.oneops.certs.model.RevokeReq;
 import com.oneops.certs.model.RevokeRes;
 import com.oneops.certs.model.SerialNumberRes;
 import com.oneops.certs.model.ViewRes;
+import com.oneops.certs.tls.AliasKeyManager;
 import com.squareup.moshi.Moshi;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +44,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
@@ -95,7 +97,14 @@ public abstract class CwsClient {
 
   /** Keystore password. */
   @Redacted
-  public abstract String storePassword();
+  public abstract String keystorePassword();
+
+  /**
+   * The default KeyManager will select the first <b>PrivateKeyEntry</b> in from keystore. Set the
+   * alias name to use a specific key.
+   */
+  @Nullable
+  public abstract String keyAlias();
 
   /** Enable http logging for debugging. */
   public abstract boolean debug();
@@ -190,7 +199,7 @@ public abstract class CwsClient {
           throw new IllegalStateException("Can't find the keystore: " + keystore());
         }
         KeyStore ks = KeyStore.getInstance("PKCS12");
-        ks.load(ins, storePassword().toCharArray());
+        ks.load(ins, keystorePassword().toCharArray());
         return ks;
       }
     } catch (IOException | GeneralSecurityException ex) {
@@ -211,15 +220,24 @@ public abstract class CwsClient {
   }
 
   /**
-   * Initialize new key managers from the keystore.
+   * Initialize new key managers from the keystore. Uses {@link AliasKeyManager} if the {@link
+   * #keyAlias()} is not null.
    *
    * @param keystore PKCS12 keystore
    */
   private KeyManager[] initKeyManager(KeyStore keystore) throws GeneralSecurityException {
-    final KeyManagerFactory kmfactory =
+    final KeyManagerFactory kmf =
         KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-    kmfactory.init(keystore, storePassword().toCharArray());
-    return kmfactory.getKeyManagers();
+    kmf.init(keystore, keystorePassword().toCharArray());
+    KeyManager[] keyManagers = kmf.getKeyManagers();
+
+    if (keyAlias() != null) {
+      log.info("Using Alias KeyManager for " + keyAlias());
+      X509KeyManager km = (X509KeyManager) keyManagers[0];
+      X509KeyManager aliasKm = new AliasKeyManager(km, keyAlias());
+      keyManagers = new X509KeyManager[] {aliasKm};
+    }
+    return keyManagers;
   }
 
   /**
@@ -266,13 +284,15 @@ public abstract class CwsClient {
 
     public abstract Builder keystore(String keystore);
 
-    public abstract Builder storePassword(String password);
+    public abstract Builder keystorePassword(String keystorePassword);
+
+    public abstract Builder keyAlias(String keyAlias);
 
     public abstract Builder debug(boolean debug);
 
     public abstract Builder timeout(int timeout);
 
-    public abstract CwsClient autoBuild();
+    abstract CwsClient autoBuild();
 
     /**
      * Build and initialize CWS client.
