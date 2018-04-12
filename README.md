@@ -30,11 +30,11 @@ CwsClient client = CwsClient.builder()
             .keystorePassword("Keystore password")
             .build();
 ```
-  - Keystore should be of type `PKCS#12` format. 
+  - Keystore should be of type [PKCS#12][2] format. 
   - For loading the keystore from classpath use, `classpath:/<your/cws/keystore/path>.p12`
-  - If the keystore contains multiple cert entries, use `.keyAlias("cws-client-key")` to select the 
+  - If the keystore contains multiple cert entries, use [.keyAlias("cws-client-key")][3] to select the 
     proper client private key.
-  - To enable http debugging for troubleshooting, set `.debug(true)` to the `CwsClient.builder()`
+  - To enable http debugging for troubleshooting, set [.debug(true)][4] to the [CwsClient.builder()][5]
   - In order to create a `PKCS#12(.p12)` keystore from PEM/DER encoded certificate, use the following `openssl` command.
   
     ```ruby
@@ -143,6 +143,11 @@ License
 <!-- Badges -->
 
 [1]: https://search.maven.org/remote_content?g=com.oneops&a=certs-client&v=LATEST
+[2]: https://en.wikipedia.org/wiki/PKCS_12
+[3]: http://oneops.com/certs-client/javadocs/com/oneops/certs/CwsClient.html#keyAlias--
+[4]: http://oneops.com/certs-client/javadocs/com/oneops/certs/CwsClient.html#debug--
+[5]: http://oneops.com/certs-client/javadocs/com/oneops/certs/CwsClient.Builder.html
+
 
 [maven-url]: http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.oneops%22%20AND%20a%3A%22certs-client%22
 [maven-svg]: https://img.shields.io/maven-central/v/com.oneops/certs-client.svg?label=Maven%20Central&style=flat-square
