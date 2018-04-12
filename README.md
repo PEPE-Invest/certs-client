@@ -37,7 +37,7 @@ CwsClient client = CwsClient.builder()
   - To enable http debugging for troubleshooting, set `.debug(true)` to the `CwsClient.builder()`
   - In order to create a `PKCS#12(.p12)` keystore from PEM/DER encoded certificate, use the following `openssl` command.
   
-    ```bash
+    ```ruby
     $ openssl pkcs12 -export -chain -out cws-keystore.p12 -inkey private.key -password pass:test123 \
                       -in client.crt -certfile client.crt -CAfile cacert.crt -name cws-client-key \
                       -caname root-ca

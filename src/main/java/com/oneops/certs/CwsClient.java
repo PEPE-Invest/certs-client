@@ -100,8 +100,8 @@ public abstract class CwsClient {
   public abstract String keystorePassword();
 
   /**
-   * The default KeyManager will select the first <b>PrivateKeyEntry</b> in from keystore. Set the
-   * alias name to use a specific key.
+   * CWS client private key alias name used for client authentication. If not set, will select the
+   * first <b>PrivateKeyEntry</b> from keystore.
    */
   @Nullable
   public abstract String keyAlias();
