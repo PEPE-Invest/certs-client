@@ -153,8 +153,8 @@ License
 [maven-svg]: https://img.shields.io/maven-central/v/com.oneops/certs-client.svg?label=Maven%20Central&style=flat-square
 
 [cl-url]: https://github.com/oneops/certs-client/blob/master/CHANGELOG.md
-[cl-svg]: https://img.shields.io/badge/change--log-latest-blue.svg?style=flat-square
+[cl-svg]: https://img.shields.io/badge/change--log-latest-green.svg?style=flat-square
 
 [javadoc-url]: https://oneops.github.io/certs-client/javadocs/
-[javadoc-svg]: https://img.shields.io/badge/api--doc-latest-ff69b4.svg.svg?style=flat-square
+[javadoc-svg]: https://img.shields.io/badge/api--doc-latest-cyan.svg?style=flat-square
 
