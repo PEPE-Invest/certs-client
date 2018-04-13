@@ -1,26 +1,30 @@
-# Change Log
-All notable changes to this project will be documented in this file. The format
-is based on [Keep a Changelog](http://keepachangelog.com/).
+# Changelog
+All notable changes to this project will be documented in this file.
 
-## [1.1.0]
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
- - Added an option to select client cert alias.
- 
-## [1.0.0]
+## [Unreleased]
+### Changed
+- Junit dependency updated to `5.1.1`.
 
- - Initial release.
-  
-[1.1.0]: https://github.com/oneops/certs-client#1.1.0
-[1.0.0]: https://github.com/oneops/certs-client#1.0.0
+## [1.1.0] - 2018-04-12
+### Added
+- Added an option to select client cert alias.
+
+### Changed
+- Updated java doc.
+
+### Removed
+- Unused error classes.
+
+### Fixed
+
+## [1.0.0] - 2018-04-06
+### Added
+- Cws client initial release.
 
 
-
-
-
-
-
-
-
-
-
-
+[Unreleased]: https://github.com/oneops/certs-client/compare/release-1.1.0...HEAD
+[1.1.0]: https://github.com/oneops/certs-client/compare/release-1.0.0...release-1.1.0
+[1.0.0]: https://github.com/oneops/certs-client/compare/release-1.0.0...release-1.0.0
