@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import com.oneops.certs.model.CertBundle;
 import com.oneops.certs.model.CertFormat;
 import com.oneops.certs.model.RevokeReason;
 import com.oneops.certs.model.RevokeRes;
@@ -34,11 +35,12 @@ class CWSClientTest {
             .teamDL(CwsConfig.teamDL())
             .keystore(CwsConfig.keystore())
             .keystorePassword(CwsConfig.password())
+            .debug(false)
             .build();
   }
 
   @Test
-  void certApis() throws IOException, InterruptedException {
+  void certApis() throws Exception {
 
     String cn = "tekton-test1.dev." + CwsConfig.domain();
     String teamDL = "dev-1234";
@@ -58,14 +60,22 @@ class CWSClientTest {
     System.out.println("Creating cert: " + cn);
     String cert = client.createCert(cn, sans, teamDL);
     assertNotNull(cert);
-    System.out.println("Waiting until cert is available for download...");
-    Thread.sleep(45 * 1000);
 
     System.out.println("Downloading and decoding the cert: " + cn);
     String certContent = client.downloadCert(cn, teamDL, "test1@Eeweweesd", CertFormat.PKCS12);
     assertTrue(
         Base64.getDecoder().decode(certContent).length > 0,
         "Can't decode the downloaded cert content");
+
+    System.out.println("Downloading cert bundle for " + cn);
+    CertBundle certBundle = client.downloadCert(cn, teamDL, "test1@Eeweweesd");
+    assertNotNull(certBundle);
+    System.out.println(certBundle);
+    assertNotNull(certBundle.cacert());
+
+    System.out.println("Downloading an invalid cert.");
+    assertThrows(
+        CwsException.class, () -> client.downloadCert(cn + "xxxx", teamDL, "test1@Eeweweesd"));
 
     System.out.println("Getting cert expiration date.");
     LocalDateTime date = client.getCertExpirationDate(cn, teamDL);

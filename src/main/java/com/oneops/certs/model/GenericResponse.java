@@ -19,5 +19,19 @@ public abstract class GenericResponse {
 
   @Nullable
   @Json(name = "ErrorMessage")
-  public abstract String errorMsg();
+  public abstract String errorDetails();
+
+  /**
+   * Returns the full error message. This is mainly used in exception and logging.
+   *
+   * @return full error message string.
+   */
+  public String errorMsg() {
+    StringBuilder buf = new StringBuilder();
+    buf.append(error());
+    if (errorDetails() != null) {
+      buf.append(", ").append(errorDetails());
+    }
+    return buf.toString();
+  }
 }

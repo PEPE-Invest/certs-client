@@ -1,7 +1,7 @@
 package com.oneops.certs;
 
 /** Cws config. */
-public class CwsConfig {
+class CwsConfig {
 
   /** Check if valid CWS env config available for testing. */
   static boolean isValid() {

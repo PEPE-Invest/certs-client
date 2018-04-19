@@ -17,7 +17,7 @@ public class CwsException extends IOException {
    * @param err Cws failed response.
    */
   public CwsException(@Nonnull GenericResponse err) {
-    super(err.error() + ", " + err.errorMsg());
+    super(err.errorMsg());
   }
 
   public CwsException(String message) {

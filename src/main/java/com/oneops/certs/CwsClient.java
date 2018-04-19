@@ -1,10 +1,12 @@
 package com.oneops.certs;
 
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static okhttp3.logging.HttpLoggingInterceptor.Level.BODY;
 
 import com.google.auto.value.AutoValue;
+import com.oneops.certs.model.CertBundle;
 import com.oneops.certs.model.CertFormat;
 import com.oneops.certs.model.CreateReq;
 import com.oneops.certs.model.CreateRes;
@@ -26,17 +28,25 @@ import com.oneops.certs.model.RevokeReq;
 import com.oneops.certs.model.RevokeRes;
 import com.oneops.certs.model.SerialNumberRes;
 import com.oneops.certs.model.ViewRes;
+import com.oneops.certs.security.pem.PemWriter;
 import com.oneops.certs.tls.AliasKeyManager;
+import com.oneops.certs.util.ThrowingSupplier;
 import com.squareup.moshi.Moshi;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -242,7 +252,7 @@ public abstract class CwsClient {
 
   /**
    * Helper method to execute {@link Call} object and returns the proper response or throws {@link
-   * CwsException}.
+   * CwsException} based on the response data.
    *
    * <p>CWS has some crappy way of handling error responses and it won't honour any standard HTTP
    * error codes.
@@ -255,16 +265,25 @@ public abstract class CwsClient {
       if (body.success()) {
         return body;
       } else {
-        StringBuilder buf = new StringBuilder();
-        buf.append(body.error());
-        if (body.errorMsg() != null) {
-          buf.append(", ").append(body.errorMsg());
-        }
-        throw new CwsException(buf.toString());
+        throw new CwsException(body.errorMsg());
       }
     } else {
       throw new CwsException("Null response from Certificate Web service.");
     }
+  }
+
+  /**
+   * Helper method to execute {@link Call} object and returns the response.
+   *
+   * @see #exec(Call)
+   */
+  private <T extends GenericResponse> T execRaw(Call<T> call) throws IOException {
+    Response<T> res = call.execute();
+    T body = res.body();
+    if (body == null) {
+      throw new CwsException("Null response from Certificate Web service.");
+    }
+    return body;
   }
 
   public static Builder builder() {
@@ -457,12 +476,12 @@ public abstract class CwsClient {
    *     the service.
    */
   public DownloadRes downloadCert(DownloadReq req) throws IOException {
-    return exec(certWebService.download(req));
+    return retry(() -> execRaw(certWebService.download(req)), 6);
   }
 
   /**
    * Returns the certificate data with given details in the format requested in base64 encoded
-   * format.
+   * format. By default the certificate will include the whole cert chain and private key.
    *
    * @param commonName cert common name
    * @param teamDLName The team DL, which can be absolute/relative to the base {@link #teamDL()}.
@@ -491,6 +510,115 @@ public abstract class CwsClient {
             .password(password)
             .build();
     return downloadCert(req).certificateData();
+  }
+
+  /**
+   * Download {@link CertBundle} for a given common name. Cert bundle contains the PEM encoded
+   * private key, client cert and cacert chain separated for easy use.
+   *
+   * @param commonName cert common name
+   * @param teamDLName The team DL, which can be absolute/relative to the base {@link #teamDL()}.
+   * @param password The password to protect the private key. Password complexity requires between
+   *     12 and 100 characters and at least one of each the following:
+   *     <pre>
+   *        * Uppercase character
+   *        * Lowercase character
+   *        * Special character
+   *        * Number
+   *      </pre>
+   *
+   * @return cert bundle.
+   * @throws IOException throws if certificate/PolicyDN doesn't exist or any communication error to
+   *     the service.
+   */
+  public CertBundle downloadCert(String commonName, String teamDLName, String password)
+      throws IOException {
+    DownloadReq req =
+        DownloadReq.builder()
+            .appId(appId())
+            .teamDL(normalizeTeamDL(teamDLName))
+            .commonName(commonName)
+            .format(CertFormat.PKCS12)
+            .password(password)
+            .build();
+
+    DownloadRes certRes = downloadCert(req);
+    return getCertBundle(certRes, password);
+  }
+
+  /**
+   * A helper method to create cert bundle from download response.
+   *
+   * @param certRes {@link DownloadRes}
+   * @param password keystore/key password.
+   * @return cert bundle.
+   * @throws CwsException throw if any error creating cert bundle.
+   */
+  private CertBundle getCertBundle(DownloadRes certRes, String password) throws CwsException {
+    byte[] p12Bytes = Base64.getDecoder().decode(requireNonNull(certRes.certificateData()));
+    char[] ksPasswd = password.toCharArray();
+
+    String pemKey;
+    String pemCert;
+    String pemCertChain;
+
+    try (ByteArrayInputStream bis = new ByteArrayInputStream(p12Bytes)) {
+      KeyStore ks = KeyStore.getInstance(CertFormat.PKCS12.name());
+      ks.load(bis, ksPasswd);
+
+      // Get the first alias.
+      String alias = ks.aliases().nextElement();
+
+      PrivateKey key = (PrivateKey) ks.getKey(alias, ksPasswd);
+      X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
+      // Cert chain is ordered with the user's certificate first. Skip that.
+      List<X509Certificate> cacerts =
+          Arrays.stream(ks.getCertificateChain(alias))
+              .skip(1)
+              .map(X509Certificate.class::cast)
+              .collect(Collectors.toList());
+
+      pemKey = PemWriter.writePrivateKey(key);
+      pemCert = PemWriter.writeCertificate(cert);
+      pemCertChain = PemWriter.writeCertificates(cacerts);
+    } catch (Exception e) {
+      throw new CwsException("Cert bundle creation failed.", e);
+    }
+
+    return CertBundle.create(pemKey, pemCert, pemCertChain, password);
+  }
+
+  /**
+   * A helper method to retry the given function with sleep.
+   *
+   * @param func function (Lambda) to execute.
+   * @param maxCount max no of times to execute.
+   * @param <T> response type.
+   * @param <E> checked exception type.
+   * @return response
+   * @throws IOException throws if certificate/PolicyDN doesn't exist or any communication error to
+   *     the service.
+   */
+  private <T extends GenericResponse, E extends IOException> T retry(
+      ThrowingSupplier<T, E> func, final int maxCount) throws IOException {
+
+    T res = func.get();
+    int i = 0;
+    while (!res.success()) {
+      String err = res.errorMsg();
+      if (err.toLowerCase().contains("does not exist") || i >= maxCount) {
+        throw new CwsException(err);
+      }
+      log.info(err + ", retrying!");
+      try {
+        Thread.sleep(10 * 1000);
+      } catch (InterruptedException ignore) {
+      }
+
+      res = func.get();
+      i++;
+    }
+    return res;
   }
 
   /**
