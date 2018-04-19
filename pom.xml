@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>certs-client</artifactId>
-  <version>1.1.1</version>
+  <version>1.1.2-SNAPSHOT</version>
   <name>certs-client</name>
   <packaging>jar</packaging>
   <description>Java API for Certificate Web Service.</description>
@@ -24,7 +24,7 @@
   <scm>
     <developerConnection>scm:git:git@github.com:oneops/certs-client.git</developerConnection>
     <url>https://github.com/oneops/certs-client</url>
-    <tag>release-1.1.1</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
