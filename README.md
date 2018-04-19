@@ -13,7 +13,7 @@ Download [the latest JAR][1] or grab via Maven:
 <dependency>
   <groupId>com.oneops</groupId>
   <artifactId>certs-client</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
 </dependency>
 ```
 
@@ -69,9 +69,18 @@ boolean exists = client.certExists(cn, teamDL);
 
 #### Download certificate
 
-```java
-String base64Content = client.downloadCert(cn, teamDL, "test1@Eeweweesd", CertFormat.PKCS12);
-```
+  ```java
+  String base64Content = client.downloadCert(cn, teamDL, "test1@Eeweweesd", CertFormat.PKCS12);
+  ```
+  * Download [cert bundle][6], which contains [PEM][7] encoded private key, client cert and cacerts.
+  ```java
+  CertBundle certBundle = client.downloadCert(cn, teamDL, "test1@Eeweweesd");
+  // certBundle.key() 
+  // certBundle.keyPassword() 
+  // certBundle.cert()
+  // certBundle.cacert()
+  ```
+
 
 #### Get certificate expiration date
 
@@ -147,7 +156,8 @@ License
 [3]: http://oneops.com/certs-client/javadocs/com/oneops/certs/CwsClient.html#keyAlias--
 [4]: http://oneops.com/certs-client/javadocs/com/oneops/certs/CwsClient.html#debug--
 [5]: http://oneops.com/certs-client/javadocs/com/oneops/certs/CwsClient.Builder.html
-
+[6]: http://oneops.com/certs-client/javadocs/com/oneops/certs/model/CertBundle.html
+[7]: https://en.wikipedia.org/wiki/Privacy-enhanced_Electronic_Mail
 
 [maven-url]: http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.oneops%22%20AND%20a%3A%22certs-client%22
 [maven-svg]: https://img.shields.io/maven-central/v/com.oneops/certs-client.svg?label=Maven%20Central&style=flat-square

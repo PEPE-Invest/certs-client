@@ -6,7 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
+
+
+## [1.1.1] - 2018-04-19
+### Added
+- Auto retry the cert download, so no more sleep between create and download.
+- Auto extract the cert to key, client cert and cacerts PEM files.
+- Google java style formatter plugin.
+
+### Changed
 - Junit dependency updated to `5.1.1`.
+- Misc refactorings.
 
 ## [1.1.0] - 2018-04-12
 ### Added
@@ -25,6 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Cws client initial release.
 
 
-[Unreleased]: https://github.com/oneops/certs-client/compare/release-1.1.0...HEAD
+[Unreleased]: https://github.com/oneops/certs-client/compare/release-1.1.1...HEAD
+[1.1.1]: https://github.com/oneops/certs-client/compare/release-1.1.0...release-1.1.1
 [1.1.0]: https://github.com/oneops/certs-client/compare/release-1.0.0...release-1.1.0
 [1.0.0]: https://github.com/oneops/certs-client/compare/release-1.0.0...release-1.0.0
