@@ -28,8 +28,9 @@ import com.oneops.certs.model.RevokeReq;
 import com.oneops.certs.model.RevokeRes;
 import com.oneops.certs.model.SerialNumberRes;
 import com.oneops.certs.model.ViewRes;
-import com.oneops.certs.security.pem.PemWriter;
-import com.oneops.certs.tls.AliasKeyManager;
+import com.oneops.certs.security.PasswordGen;
+import com.oneops.certs.security.pem.PemUtils;
+import com.oneops.certs.security.tls.AliasKeyManager;
 import com.oneops.certs.util.ThrowingSupplier;
 import com.squareup.moshi.Moshi;
 import java.io.ByteArrayInputStream;
@@ -46,6 +47,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.net.ssl.KeyManager;
@@ -323,7 +325,7 @@ public abstract class CwsClient {
       try {
         client.init();
       } catch (GeneralSecurityException ex) {
-        throw new IllegalArgumentException("CwsClient init failed.", ex);
+        throw new IllegalStateException("CwsClient init failed.", ex);
       }
       return client;
     }
@@ -486,14 +488,14 @@ public abstract class CwsClient {
    * @param commonName cert common name
    * @param teamDLName The team DL, which can be absolute/relative to the base {@link #teamDL()}.
    * @param password The password to protect the private key. Password complexity requires between
-   *     12 and 100 characters and at least one of each the following:
+   *     15 and 100 characters and at least one of each the following:
    *     <pre>
    *        * Uppercase character
    *        * Lowercase character
    *        * Special character
    *        * Number
    *      </pre>
-   *
+   *     Use {@link PasswordGen#generate(int)} to auto gen download password.
    * @param format {@link CertFormat} The format in which the certificate should be returned.
    * @return Certificate data in the format requested in base64 encoded format.
    * @throws IOException throws if certificate/PolicyDN doesn't exist or any communication error to
@@ -518,45 +520,51 @@ public abstract class CwsClient {
    *
    * @param commonName cert common name
    * @param teamDLName The team DL, which can be absolute/relative to the base {@link #teamDL()}.
-   * @param password The password to protect the private key. Password complexity requires between
-   *     12 and 100 characters and at least one of each the following:
-   *     <pre>
-   *        * Uppercase character
-   *        * Lowercase character
-   *        * Special character
-   *        * Number
-   *      </pre>
-   *
+   * @param keyPassword The password to protect the private key.If password is empty, the private
+   *     key will be un-encrypted. Password should be at-least 4 chars long.
    * @return cert bundle.
    * @throws IOException throws if certificate/PolicyDN doesn't exist or any communication error to
    *     the service.
    */
-  public CertBundle downloadCert(String commonName, String teamDLName, String password)
+  public CertBundle downloadCert(String commonName, String teamDLName, Optional<String> keyPassword)
       throws IOException {
+
+    String keystorePass = PasswordGen.builder().build().generate(20);
+    // Openssl has the same validation for key password.
+    keyPassword.ifPresent(
+        p -> {
+          if (p.length() < 4) {
+            throw new IllegalArgumentException(
+                "Private key password should be at-least 4 characters.");
+          }
+        });
+
     DownloadReq req =
         DownloadReq.builder()
             .appId(appId())
             .teamDL(normalizeTeamDL(teamDLName))
             .commonName(commonName)
             .format(CertFormat.PKCS12)
-            .password(password)
+            .password(keystorePass)
             .build();
 
     DownloadRes certRes = downloadCert(req);
-    return getCertBundle(certRes, password);
+    return getCertBundle(certRes, keystorePass, keyPassword);
   }
 
   /**
    * A helper method to create cert bundle from download response.
    *
    * @param certRes {@link DownloadRes}
-   * @param password keystore/key password.
+   * @param keystorePass PKCS#12 keystore password
+   * @param keyPassword private key password.
    * @return cert bundle.
    * @throws CwsException throw if any error creating cert bundle.
    */
-  private CertBundle getCertBundle(DownloadRes certRes, String password) throws CwsException {
+  private CertBundle getCertBundle(
+      DownloadRes certRes, String keystorePass, Optional<String> keyPassword) throws CwsException {
     byte[] p12Bytes = Base64.getDecoder().decode(requireNonNull(certRes.certificateData()));
-    char[] ksPasswd = password.toCharArray();
+    char[] ksPasswd = keystorePass.toCharArray();
 
     String pemKey;
     String pemCert;
@@ -568,7 +576,6 @@ public abstract class CwsClient {
 
       // Get the first alias.
       String alias = ks.aliases().nextElement();
-
       PrivateKey key = (PrivateKey) ks.getKey(alias, ksPasswd);
       X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
       // Cert chain is ordered with the user's certificate first. Skip that.
@@ -578,14 +585,21 @@ public abstract class CwsClient {
               .map(X509Certificate.class::cast)
               .collect(Collectors.toList());
 
-      pemKey = PemWriter.writePrivateKey(key);
-      pemCert = PemWriter.writeCertificate(cert);
-      pemCertChain = PemWriter.writeCertificates(cacerts);
+      pemCert = PemUtils.writeCertificate(cert);
+      pemCertChain = PemUtils.writeCertificates(cacerts);
+
+      // Encrypt private key if key password is present.
+      if (keyPassword.isPresent()) {
+        pemKey = PemUtils.encryptPrivateKey(key, keyPassword.get());
+        return CertBundle.create(pemKey, keyPassword.get(), pemCert, pemCertChain);
+      } else {
+        pemKey = PemUtils.writePrivateKey(key);
+        return CertBundle.create(pemKey, pemCert, pemCertChain);
+      }
+
     } catch (Exception e) {
       throw new CwsException("Cert bundle creation failed.", e);
     }
-
-    return CertBundle.create(pemKey, pemCert, pemCertChain, password);
   }
 
   /**
@@ -605,7 +619,7 @@ public abstract class CwsClient {
     T res = func.get();
     int i = 0;
     while (!res.success()) {
-      String err = res.errorMsg();
+      String err = requireNonNull(res.errorDetails());
       if (err.toLowerCase().contains("does not exist") || i >= maxCount) {
         throw new CwsException(err);
       }

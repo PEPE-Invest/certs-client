@@ -1,4 +1,4 @@
-package com.oneops.certs.tls;
+package com.oneops.certs.security.tls;
 
 import static java.util.Objects.requireNonNull;
 
@@ -34,6 +34,7 @@ public class AliasKeyManager implements X509KeyManager {
    *     which issuers are used.
    * @return an array of the matching alias names, or null if there were no matches.
    */
+  @Override
   public String[] getClientAliases(String keyType, Principal[] issuers) {
     return delegate.getClientAliases(keyType, issuers);
   }
@@ -50,6 +51,7 @@ public class AliasKeyManager implements X509KeyManager {
    *     indicates that implementations are free to select an alias applicable to any socket.
    * @return the alias name for the desired key, or null if there are no matches.
    */
+  @Override
   public String chooseClientAlias(String[] keyType, Principal[] issuers, Socket socket) {
     return aliasName;
   }
@@ -63,6 +65,7 @@ public class AliasKeyManager implements X509KeyManager {
    *     which issuers are used.
    * @return an array of the matching alias names, or null if there were no matches.
    */
+  @Override
   public String[] getServerAliases(String keyType, Principal[] issuers) {
     return delegate.getServerAliases(keyType, issuers);
   }
@@ -78,6 +81,7 @@ public class AliasKeyManager implements X509KeyManager {
    *     indicates that implementations are free to select an alias applicable to any socket.
    * @return the alias name for the desired key, or null if there are no matches.
    */
+  @Override
   public String chooseServerAlias(String keyType, Principal[] issuers, Socket socket) {
     return delegate.chooseServerAlias(keyType, issuers, socket);
   }
@@ -89,6 +93,7 @@ public class AliasKeyManager implements X509KeyManager {
    * @return the certificate chain (ordered with the user's certificate first and the root
    *     certificate authority last), or null if the alias can't be found.
    */
+  @Override
   public X509Certificate[] getCertificateChain(String alias) {
     return delegate.getCertificateChain(alias);
   }
@@ -99,6 +104,7 @@ public class AliasKeyManager implements X509KeyManager {
    * @param alias the alias name
    * @return the requested key, or null if the alias can't be found.
    */
+  @Override
   public PrivateKey getPrivateKey(String alias) {
     return delegate.getPrivateKey(alias);
   }

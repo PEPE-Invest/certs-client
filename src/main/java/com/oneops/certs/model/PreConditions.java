@@ -32,7 +32,7 @@ public class PreConditions {
    * (?=.*[A-Z])           # an upper case letter must occur at least once
    * (?=.*[@#$%^&amp;+=])  # a special character must occur at least once
    * (?=\S+$)              # no whitespace allowed in the entire string
-   * .{11,}                # anything, at least eleven places though
+   * .{11,}                # anything, at least 15 places though
    * $                     # end-of-string
    *
    * </pre>
@@ -40,9 +40,10 @@ public class PreConditions {
    * @param password password string.
    */
   public static void checkPassword(String password) {
-    if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{11,}$")) {
+    if (!password.matches(
+        "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~!@#$%^&*+=])(?=\\S+$).{15,}$")) {
       throw new IllegalArgumentException(
-          "Password must be at least 12 chars with upper case and lower case letter, number and special character");
+          "Password must be at least 15 chars with upper case and lower case letter, number and special character");
     }
   }
 }

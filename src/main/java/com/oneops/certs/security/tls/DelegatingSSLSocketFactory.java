@@ -1,4 +1,4 @@
-package com.oneops.certs.tls;
+package com.oneops.certs.security.tls;
 
 import java.io.IOException;
 import java.net.InetAddress;

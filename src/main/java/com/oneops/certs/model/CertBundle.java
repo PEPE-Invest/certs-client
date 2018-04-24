@@ -1,6 +1,7 @@
 package com.oneops.certs.model;
 
 import com.google.auto.value.AutoValue;
+import java.util.Optional;
 import javax.annotation.Nullable;
 
 /**
@@ -13,9 +14,9 @@ public abstract class CertBundle {
   @Redacted
   public abstract String key();
 
-  /** Private key password */
+  /** Private key password (Optional) if the key is encrypted. */
   @Redacted
-  public abstract String keyPassword();
+  public abstract Optional<String> keyPassword();
 
   /** PEM encoded client certificate. */
   public abstract String cert();
@@ -24,23 +25,33 @@ public abstract class CertBundle {
   @Nullable
   public abstract String cacert();
 
+  public static Builder builder() {
+    return new AutoValue_CertBundle.Builder();
+  }
+
   /**
-   * Creates a new cert bundle.
+   * Creates a new cert bundle with encrypted private key.
+   *
+   * @param key PEM encoded certificate private key.
+   * @param keyPassword private key password.
+   * @param cert PEM encoded client certificate.
+   * @param cacert PEM encoded CA cert chain.
+   * @return {@link CertBundle}
+   */
+  public static CertBundle create(String key, String keyPassword, String cert, String cacert) {
+    return builder().key(key).keyPassword(keyPassword).cert(cert).cacert(cacert).build();
+  }
+
+  /**
+   * Creates a new cert bundle with un-encrypted private key.
    *
    * @param key PEM encoded certificate private key.
    * @param cert PEM encoded client certificate.
    * @param cacert PEM encoded CA cert chain.
-   * @param keyPassword private key password.
    * @return {@link CertBundle}
    */
-  public static CertBundle create(String key, String cert, String cacert, String keyPassword) {
-    return builder().key(key).cert(cert).cacert(cacert).keyPassword(keyPassword).build();
-  }
-
-  public abstract Builder toBuilder();
-
-  public static Builder builder() {
-    return new AutoValue_CertBundle.Builder();
+  public static CertBundle create(String key, String cert, String cacert) {
+    return builder().key(key).cert(cert).cacert(cacert).build();
   }
 
   @AutoValue.Builder
@@ -48,11 +59,11 @@ public abstract class CertBundle {
 
     public abstract Builder key(String key);
 
+    public abstract Builder keyPassword(String keyPassword);
+
     public abstract Builder cert(String cert);
 
     public abstract Builder cacert(String cacert);
-
-    public abstract Builder keyPassword(String keyPassword);
 
     public abstract CertBundle build();
   }

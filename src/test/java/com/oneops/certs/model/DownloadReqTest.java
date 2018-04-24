@@ -14,7 +14,7 @@ class DownloadReqTest {
             .teamDL("testTeamDL")
             .commonName("testapp.mycompany.com")
             .format(CertFormat.BASE64)
-            .password("@j2o@#JOwel")
+            .password("@j2o@#JOwele@3T$sdE")
             .build();
     assertNotNull(req);
   }

@@ -1,5 +1,6 @@
 package com.oneops.certs;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -11,11 +12,13 @@ import com.oneops.certs.model.CertFormat;
 import com.oneops.certs.model.RevokeReason;
 import com.oneops.certs.model.RevokeRes;
 import com.oneops.certs.model.ViewRes;
+import com.oneops.certs.security.PasswordGen;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,20 +65,27 @@ class CWSClientTest {
     assertNotNull(cert);
 
     System.out.println("Downloading and decoding the cert: " + cn);
-    String certContent = client.downloadCert(cn, teamDL, "test1@Eeweweesd", CertFormat.PKCS12);
+    String ksPasswd = PasswordGen.builder().build().generate(20);
+    String certContent = client.downloadCert(cn, teamDL, ksPasswd, CertFormat.PKCS12);
     assertTrue(
         Base64.getDecoder().decode(certContent).length > 0,
         "Can't decode the downloaded cert content");
 
-    System.out.println("Downloading cert bundle for " + cn);
-    CertBundle certBundle = client.downloadCert(cn, teamDL, "test1@Eeweweesd");
-    assertNotNull(certBundle);
+    System.out.println("Downloading cert bundle with encrypted private key for " + cn);
+    CertBundle certBundle = client.downloadCert(cn, teamDL, Optional.of("test"));
     System.out.println(certBundle);
     assertNotNull(certBundle.cacert());
+    assertNotNull(certBundle.key());
+    assertEquals(Optional.of("test"), certBundle.keyPassword());
+
+    System.out.println("Downloading cert bundle with un-encrypted private key for " + cn);
+    certBundle = client.downloadCert(cn, teamDL, Optional.empty());
+    assertNotNull(certBundle.key());
+    assertEquals(Optional.empty(), certBundle.keyPassword());
 
     System.out.println("Downloading an invalid cert.");
     assertThrows(
-        CwsException.class, () -> client.downloadCert(cn + "xxxx", teamDL, "test1@Eeweweesd"));
+        CwsException.class, () -> client.downloadCert(cn + "xxxx", teamDL, Optional.empty()));
 
     System.out.println("Getting cert expiration date.");
     LocalDateTime date = client.getCertExpirationDate(cn, teamDL);

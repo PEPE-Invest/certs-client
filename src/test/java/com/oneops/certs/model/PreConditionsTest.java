@@ -2,6 +2,7 @@ package com.oneops.certs.model;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.oneops.certs.security.PasswordGen;
 import org.junit.jupiter.api.Test;
 
 class PreConditionsTest {
@@ -18,7 +19,7 @@ class PreConditionsTest {
 
   @Test
   void checkPassword() {
-    String validPasswd = "@j2o@#JOwel";
+    String validPasswd = PasswordGen.builder().build().generate(20);
     PreConditions.checkPassword(validPasswd);
 
     String invalidPasswd = "test123";
