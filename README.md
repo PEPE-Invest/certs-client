@@ -70,20 +70,24 @@ boolean exists = client.certExists(cn, teamDL);
 #### Download certificate
 
   * Download the private key, certificate and it's trust chain as [PKCS#12][2] format. 
-  ```java
-  String keystorePasswd = PasswordGen.builder().build().generate(20); // Keystore/key password
-  String base64Content = client.downloadCert(cn, teamDL, keystorePasswd, CertFormat.PKCS12);
-  ```
+  
+    ```java
+    // Keystore/key password
+    String keystorePasswd = PasswordGen.builder().build().generate(20); 
+    String base64Content = client.downloadCert(cn, teamDL, keystorePasswd, CertFormat.PKCS12);
+    ```
   
   * Download [CertBundle][6], which contains encrypted [PKCS#8][8] private key, client cert and cacerts.
-  ```java
-  // Private key password would be at-least 4 chars.
-  CertBundle certBundle = client.downloadCert(cn, teamDL, "test123");
-  // certBundle.key() 
-  // certBundle.keyPassword() 
-  // certBundle.cert()
-  // certBundle.cacert()
-  ```
+  
+    ```java
+    // Private key password should be at-least 4 chars.
+     CertBundle certBundle = client.downloadCert(cn, teamDL, Optional.of("test"));
+    // certBundle.key() 
+    // certBundle.keyPassword() 
+    // certBundle.cert()
+    // certBundle.cacert()
+    ```
+  * For downloading [CertBundle][6] with unencrypted private key, pass `Optional.empty()` as private key password.
 
 
 #### Get certificate expiration date
