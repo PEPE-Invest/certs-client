@@ -72,7 +72,7 @@ boolean exists = client.certExists(cn, teamDL);
   * Download the private key, certificate and it's trust chain as [PKCS#12][2] format. 
   
     ```java
-    // Keystore/key password
+    // Generate Keystore/key password (Optional)
     String keystorePasswd = PasswordGen.builder().build().generate(20); 
     String base64Content = client.downloadCert(cn, teamDL, keystorePasswd, CertFormat.PKCS12);
     ```
