@@ -528,8 +528,6 @@ public abstract class CwsClient {
    */
   public CertBundle downloadCert(String commonName, String teamDLName, Optional<String> keyPassword)
       throws IOException {
-
-    String keystorePass = PasswordGen.builder().build().generate(20);
     // Openssl has the same validation for key password.
     keyPassword.ifPresent(
         p -> {
@@ -538,7 +536,7 @@ public abstract class CwsClient {
                 "Private key password should be at-least 4 characters.");
           }
         });
-
+    String keystorePass = PasswordGen.builder().build().generate(20);
     DownloadReq req =
         DownloadReq.builder()
             .appId(appId())
