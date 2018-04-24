@@ -30,26 +30,26 @@ CwsClient client = CwsClient.builder()
             .keystorePassword("Keystore password")
             .build();
 ```
-  - Keystore should be of type [PKCS#12][2] format. 
-  - For loading the keystore from classpath use, `classpath:/<your/cws/keystore/path>.p12`
-  - If the keystore contains multiple cert entries, use [.keyAlias("cws-client-key")][3] to select the 
-    proper client private key.
-  - To enable http debugging for troubleshooting, set [.debug(true)][4] to the [CwsClient.builder()][5]
-  - In order to create a `PKCS#12(.p12)` keystore from PEM/DER encoded certificate, use the following `openssl` command.
-  
-    ```ruby
-    $ openssl pkcs12 -export -chain -out cws-keystore.p12 -inkey private.key -password pass:test123 \
-                      -in client.crt -certfile client.crt -CAfile cacert.crt -name cws-client-key \
-                      -caname root-ca
-                  
-    # Add trust-store entry (cacert.crt) to the keystore.
-    $ keytool -importcert -trustcacerts -alias root-ca -storetype PKCS12 \
-                           -keystore cws-keystore.p12 -storepass test123 -file cacert.crt
-                       
-    # View pkcs12 keystore details                   
-    $ openssl pkcs12 -info -password pass:test123 -in cws-keystore.p12 
-    # keytool -list  -storepass test123 -keystore cws-keystore.p12 -v                
-    ```
+
+- Keystore should be of type [PKCS#12][2] format. 
+- For loading the keystore from classpath use, `classpath:/<your/cws/keystore/path>.p12`
+- If the keystore contains multiple cert entries, use [.keyAlias("cws-client-key")][3] to select the proper client private key.
+- To enable http debugging for troubleshooting, set [.debug(true)][4] to the [CwsClient.builder()][5]
+- In order to create a `PKCS#12(.p12)` keystore from PEM/DER encoded certificate, use the following `openssl` command.
+
+```ruby
+$ openssl pkcs12 -export -chain -out cws-keystore.p12 -inkey private.key -password pass:test123 \
+                  -in client.crt -certfile client.crt -CAfile cacert.crt -name cws-client-key \
+                  -caname root-ca
+              
+# Add trust-store entry (cacert.crt) to the keystore.
+$ keytool -importcert -trustcacerts -alias root-ca -storetype PKCS12 \
+                       -keystore cws-keystore.p12 -storepass test123 -file cacert.crt
+                   
+# View pkcs12 keystore details                   
+$ openssl pkcs12 -info -password pass:test123 -in cws-keystore.p12 
+# keytool -list  -storepass test123 -keystore cws-keystore.p12 -v                
+```
 
 #### Create new certificate
 
