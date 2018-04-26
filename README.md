@@ -13,7 +13,7 @@ Download [the latest JAR][1] or grab via Maven:
 <dependency>
   <groupId>com.oneops</groupId>
   <artifactId>certs-client</artifactId>
-  <version>1.1.2</version>
+  <version>1.1.3</version>
 </dependency>
 ```
 
@@ -81,13 +81,20 @@ boolean exists = client.certExists(cn, teamDL);
   
     ```java
     // Private key password should be at-least 4 chars.
-     CertBundle certBundle = client.downloadCert(cn, teamDL, Optional.of("test"));
+     CertBundle certBundle = client.downloadCert(cn, teamDL, Optional.of("test123"));
     // certBundle.key() 
     // certBundle.keyPassword() 
     // certBundle.cert()
     // certBundle.cacert()
     ```
-  * For downloading [CertBundle][6] with unencrypted private key, pass `Optional.empty()` as private key password.
+  * Download [CertBundle][6] which contains encrypted `PKCS#1` private key, client cert and cacerts.
+  
+    ```java
+     CertBundle certBundle = client.downloadCert(cn, teamDL, Optional.empty());
+    // certBundle.key() 
+    // certBundle.cert()
+    // certBundle.cacert()
+    ```
 
 
 #### Get certificate expiration date
@@ -139,6 +146,7 @@ Set the following env variables and run `./mvnw clean test` to execute the unit 
    - [Retrofit](https://github.com/square/retrofit/)
    - [OkHttp](https://github.com/square/okhttp)
    - [Moshi](https://github.com/square/Moshi/)
+   - [Bouncy Castle](https://github.com/bcgit/bc-java)
 
 License
 -------

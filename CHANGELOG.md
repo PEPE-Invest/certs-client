@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
 
+## [1.1.3] - 2018-04-26
+### Changed
+- Create `PKCS#1` private keys by default.
+
 ## [1.1.2] - 2018-04-24
 ### Added
 - Added an option to create (en)decrypted cert bundles.
@@ -45,7 +49,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Cws client initial release.
 
 
-[Unreleased]: https://github.com/oneops/certs-client/compare/release-1.1.2...HEAD
+[Unreleased]: https://github.com/oneops/certs-client/compare/release-1.1.3...HEAD
+[1.1.3]: https://github.com/oneops/certs-client/compare/release-1.1.2...release-1.1.3
 [1.1.2]: https://github.com/oneops/certs-client/compare/release-1.1.1...release-1.1.2
 [1.1.1]: https://github.com/oneops/certs-client/compare/release-1.1.0...release-1.1.1
 [1.1.0]: https://github.com/oneops/certs-client/compare/release-1.0.0...release-1.1.0
