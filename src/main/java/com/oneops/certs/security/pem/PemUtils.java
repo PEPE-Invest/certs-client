@@ -29,6 +29,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 
 /**
  * Some utility methods to deal with private key, client cert and cacerts pem files.
@@ -57,7 +58,7 @@ public class PemUtils {
   private PemUtils() {}
 
   /**
-   * Returns {@link PublicKey} as PEM encoded string.
+   * Returns PKCS#8 {@link PublicKey} as PEM encoded string.
    *
    * @param publicKey Keystore public key.
    * @return PEM encoded string.
@@ -134,15 +135,15 @@ public class PemUtils {
   /**
    * Loads the private key in pem format. Provide a key password if the private key is encrypted.
    *
-   * <p>If the private key is encrypted, make sure the key is in PKCS#8 wrapped format which is not
-   * the default openssl format. To convert to the PKCS#8 format, use : <b>cat enc-key.pem | openssl
-   * pkcs8 -topk8 -inform pem -outform pem [-nocrypt] </b>
+   * <p>Note: Make sure the private key is in PKCS#8 format which is not the default openssl format.
+   * Openssl by default generates Private key in PKCS#1 format. To convert to the PKCS#8 format, use
+   * : <b>cat enc-key.pem | openssl pkcs8 -topk8 -inform pem -outform pem [-nocrypt] </b>
    *
    * @param privateKeyPem private key in Base64 encoded pem format.
    * @param keyPassword optional private key password.
    * @return {@link PrivateKey}
-   * @throws IOException
-   * @throws GeneralSecurityException
+   * @throws IOException if any i/o error reading pem file.
+   * @throws GeneralSecurityException any error while decrypting the private key.
    */
   public static PrivateKey loadPrivateKey(String privateKeyPem, Optional<String> keyPassword)
       throws IOException, GeneralSecurityException {
@@ -186,16 +187,15 @@ public class PemUtils {
    *
    * @param privateKey {@link PrivateKey}
    * @param password private key password to encrypt.
-   * @return Encrypted PEM formatted private key.
-   * @throws GeneralSecurityException
-   * @throws IOException
+   * @return Encrypted private key {@link EncryptedPrivateKeyInfo}.
+   * @throws GeneralSecurityException throws if any error encrypting.
    * @see <a href="http://www.openssl.org/docs/apps/pkcs8.html">Openssl PKCS#8</a>
    * @see <a
    *     href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html">Cipher
    *     Algos</a>
    */
-  public static String encryptPrivateKey(PrivateKey privateKey, String password)
-      throws GeneralSecurityException, IOException {
+  public static EncryptedPrivateKeyInfo encryptPrivateKey(PrivateKey privateKey, String password)
+      throws GeneralSecurityException {
 
     int count = 20; // hash iteration count
     byte[] salt = new byte[8];
@@ -215,11 +215,19 @@ public class PemUtils {
     // Now construct  PKCS#8 EncryptedPrivateKeyInfo object
     AlgorithmParameters algparms = AlgorithmParameters.getInstance(PBE_ALGO);
     algparms.init(pbeParamSpec);
-    EncryptedPrivateKeyInfo encInfo = new EncryptedPrivateKeyInfo(algparms, cipherText);
 
-    // DER encoded PKCS#8 encrypted key.
-    byte[] encPrivateKey = encInfo.getEncoded();
-    // Convert it to PEM format.
-    return PemUtils.encodePem(PemLabel.ENCRYPTED_PRIVATE_KEY, encPrivateKey);
+    return new EncryptedPrivateKeyInfo(algparms, cipherText);
+  }
+
+  /**
+   * Converts PKCS#8 private key encoding to PKCS#1, which is the OpenSSL default. This method would
+   * helpful for updating private key on Netscalar as it's only supports PKCS#1.
+   *
+   * @param privateKey DER encoded PKCS#8 private key.
+   * @return DER encoded PKCS#1 private key.
+   */
+  public static byte[] encodePKCS1(byte[] privateKey) throws IOException {
+    PrivateKeyInfo pkInfo = PrivateKeyInfo.getInstance(privateKey);
+    return pkInfo.parsePrivateKey().toASN1Primitive().getEncoded();
   }
 }

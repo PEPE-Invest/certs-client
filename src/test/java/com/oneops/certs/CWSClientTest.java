@@ -13,6 +13,7 @@ import com.oneops.certs.model.RevokeReason;
 import com.oneops.certs.model.RevokeRes;
 import com.oneops.certs.model.ViewRes;
 import com.oneops.certs.security.PasswordGen;
+import com.oneops.certs.security.pem.PemLabel;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -73,19 +74,21 @@ class CWSClientTest {
 
     System.out.println("Downloading cert bundle with encrypted private key for " + cn);
     CertBundle certBundle = client.downloadCert(cn, teamDL, Optional.of("test"));
-    System.out.println(certBundle);
     assertNotNull(certBundle.cacert());
-    assertNotNull(certBundle.key());
+    assertTrue(certBundle.key().contains(PemLabel.ENCRYPTED_PRIVATE_KEY.labelName()));
     assertEquals(Optional.of("test"), certBundle.keyPassword());
 
     System.out.println("Downloading cert bundle with un-encrypted private key for " + cn);
     certBundle = client.downloadCert(cn, teamDL, Optional.empty());
     assertNotNull(certBundle.key());
+    assertTrue(certBundle.key().contains(PemLabel.RSA_PRIVATE_KEY.labelName()));
     assertEquals(Optional.empty(), certBundle.keyPassword());
 
-    System.out.println("Downloading an invalid cert.");
+    System.out.println("Downloading an cert which not exists or invalid password.");
     assertThrows(
         CwsException.class, () -> client.downloadCert(cn + "xxxx", teamDL, Optional.empty()));
+    assertThrows(
+        IllegalArgumentException.class, () -> client.downloadCert(cn, teamDL, Optional.of("x")));
 
     System.out.println("Getting cert expiration date.");
     LocalDateTime date = client.getCertExpirationDate(cn, teamDL);

@@ -17,7 +17,7 @@ class CertBundleTest {
     certBundle = CertBundle.builder().key("key").cert("cert").cacert("cacert").build();
     assertEquals(Optional.empty(), certBundle.keyPassword());
 
-    certBundle = CertBundle.create("key", "pass", "cert", "cacert");
+    certBundle = CertBundle.create("key", Optional.of("pass"), "cert", "cacert");
     assertEquals(certBundle.keyPassword(), Optional.of("pass"));
   }
 }

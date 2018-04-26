@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.oneops</groupId>
@@ -53,6 +55,7 @@
     <junit.platform.version>1.0.0</junit.platform.version>
     <junit.version>5.1.1</junit.version>
     <jsr305.version>3.0.2</jsr305.version>
+    <bouncycastle.version>1.59</bouncycastle.version>
     <java.version>1.8</java.version>
     <gitcommit.plugin.version>2.2.4</gitcommit.plugin.version>
     <maven.build.timestamp.format>yyyy-MM-dd hh:mm:ss a z</maven.build.timestamp.format>
@@ -110,6 +113,13 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- Crypto -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+      <version>${bouncycastle.version}</version>
+    </dependency>
+    
     <!-- Logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -264,9 +274,9 @@
       </activation>
 
       <properties>
-        <cws.endpoint />
-        <cws.user />
-        <cws.password />
+        <cws.endpoint/>
+        <cws.user/>
+        <cws.password/>
       </properties>
     </profile>
   </profiles>

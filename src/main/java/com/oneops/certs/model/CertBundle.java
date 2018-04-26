@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 @AutoValue
 public abstract class CertBundle {
 
-  /** PEM encoded certificate private key */
+  /** PEM encoded private key. */
   @Redacted
   public abstract String key();
 
@@ -38,7 +38,8 @@ public abstract class CertBundle {
    * @param cacert PEM encoded CA cert chain.
    * @return {@link CertBundle}
    */
-  public static CertBundle create(String key, String keyPassword, String cert, String cacert) {
+  public static CertBundle create(
+      String key, Optional<String> keyPassword, String cert, String cacert) {
     return builder().key(key).keyPassword(keyPassword).cert(cert).cacert(cacert).build();
   }
 
@@ -60,6 +61,8 @@ public abstract class CertBundle {
     public abstract Builder key(String key);
 
     public abstract Builder keyPassword(String keyPassword);
+
+    public abstract Builder keyPassword(Optional<String> keyPassword);
 
     public abstract Builder cert(String cert);
 

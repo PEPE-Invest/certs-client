@@ -1,5 +1,7 @@
 package com.oneops.certs;
 
+import static com.oneops.certs.security.pem.PemLabel.ENCRYPTED_PRIVATE_KEY;
+import static com.oneops.certs.security.pem.PemLabel.RSA_PRIVATE_KEY;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -478,7 +480,7 @@ public abstract class CwsClient {
    *     the service.
    */
   public DownloadRes downloadCert(DownloadReq req) throws IOException {
-    return retry(() -> execRaw(certWebService.download(req)), 6);
+    return retry(() -> execRaw(certWebService.download(req)), 10);
   }
 
   /**
@@ -564,10 +566,6 @@ public abstract class CwsClient {
     byte[] p12Bytes = Base64.getDecoder().decode(requireNonNull(certRes.certificateData()));
     char[] ksPasswd = keystorePass.toCharArray();
 
-    String pemKey;
-    String pemCert;
-    String pemCertChain;
-
     try (ByteArrayInputStream bis = new ByteArrayInputStream(p12Bytes)) {
       KeyStore ks = KeyStore.getInstance(CertFormat.PKCS12.name());
       ks.load(bis, ksPasswd);
@@ -583,18 +581,22 @@ public abstract class CwsClient {
               .map(X509Certificate.class::cast)
               .collect(Collectors.toList());
 
-      pemCert = PemUtils.writeCertificate(cert);
-      pemCertChain = PemUtils.writeCertificates(cacerts);
-
+      String pemKey;
       // Encrypt private key if key password is present.
       if (keyPassword.isPresent()) {
-        pemKey = PemUtils.encryptPrivateKey(key, keyPassword.get());
-        return CertBundle.create(pemKey, keyPassword.get(), pemCert, pemCertChain);
+        // DER encoded PKCS#8 encrypted key.
+        byte[] pkcs8Encrypted = PemUtils.encryptPrivateKey(key, keyPassword.get()).getEncoded();
+        pemKey = PemUtils.encodePem(ENCRYPTED_PRIVATE_KEY, pkcs8Encrypted);
       } else {
-        pemKey = PemUtils.writePrivateKey(key);
-        return CertBundle.create(pemKey, pemCert, pemCertChain);
+        byte[] pkcs8Key = key.getEncoded();
+        // Covert to PKCS#1 format as it default for OpenSSL.
+        byte[] pkcs1Key = PemUtils.encodePKCS1(pkcs8Key);
+        pemKey = PemUtils.encodePem(RSA_PRIVATE_KEY, pkcs1Key);
       }
 
+      String pemCert = PemUtils.writeCertificate(cert);
+      String pemCertChain = PemUtils.writeCertificates(cacerts);
+      return CertBundle.create(pemKey, keyPassword, pemCert, pemCertChain);
     } catch (Exception e) {
       throw new CwsException("Cert bundle creation failed.", e);
     }

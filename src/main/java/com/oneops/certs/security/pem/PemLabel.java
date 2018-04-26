@@ -9,7 +9,10 @@ public enum PemLabel {
   /** PKCS#8 private key */
   PRIVATE_KEY("PRIVATE KEY"),
 
-  /** RSA private key. */
+  /** Encrypted PKCS#8 private key */
+  ENCRYPTED_PRIVATE_KEY("ENCRYPTED PRIVATE KEY"),
+
+  /** PKCS#1 RSA private key (Default in Openssl). */
   RSA_PRIVATE_KEY("RSA PRIVATE KEY"),
 
   /** DSA private key. */
@@ -18,9 +21,7 @@ public enum PemLabel {
   /** ECDSA private key. */
   EC_PRIVATE_KEY("EC PRIVATE KEY"),
 
-  /** Encrypted PKCS#8 client key */
-  ENCRYPTED_PRIVATE_KEY("ENCRYPTED PRIVATE KEY"),
-
+  /** X.509 public key */
   PUBLIC_KEY("PUBLIC KEY"),
 
   /** X509v3 certificate */
