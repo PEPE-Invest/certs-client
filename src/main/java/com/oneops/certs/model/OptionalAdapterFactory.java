@@ -34,8 +34,8 @@ public class OptionalAdapterFactory implements JsonAdapter.Factory {
 
   /** Optional adapter class. */
   private static class OptionalAdapter extends JsonAdapter<Optional<?>> {
-    private Moshi moshi;
-    private Type type;
+    private final Moshi moshi;
+    private final Type type;
 
     OptionalAdapter(Moshi moshi, Type type) {
       this.moshi = moshi;

@@ -19,7 +19,7 @@ public abstract class PasswordGen {
   private static final String NUMBER = "0123456789";
   private static final String SPECIAL = "~!@#$%^&*+=";
 
-  private Random rand = new Random(System.nanoTime());
+  private final Random rand = new Random(System.nanoTime());
 
   /** Set true to include lower case characters. */
   public abstract boolean lower();
