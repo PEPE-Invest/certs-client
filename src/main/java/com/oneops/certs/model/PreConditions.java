@@ -7,15 +7,15 @@ package com.oneops.certs.model;
 public class PreConditions {
 
   /**
-   * Checks CWS common name.85 chars is the CWS limit for common name. As per the DNS RFC, an FQDN
+   * Checks CWS common name. 64 chars is the CWS limit for common name. As per the DNS RFC, an FQDN
    * has a size # limit of 255 chars https://tools.ietf.org/html/rfc1035#section-2.3.4
    *
    * @param cn common name
    */
   public static void checkCN(String cn) {
-    if (cn.length() > 85) {
+    if (cn.length() > 64) {
       throw new IllegalArgumentException(
-          "Common name (" + cn + ") can not be greater than 85 chars");
+          "Common name (" + cn + ") can not be longer than 64 chars");
     }
   }
 
