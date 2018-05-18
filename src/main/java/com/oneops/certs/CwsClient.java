@@ -202,20 +202,18 @@ public abstract class CwsClient {
       fileResource = false;
     }
 
-    try {
-      try (InputStream ins =
-          fileResource
-              ? Files.newInputStream(Paths.get(ksPath))
-              : getClass().getResourceAsStream(ksPath)) {
+    try (InputStream ins =
+        fileResource
+            ? Files.newInputStream(Paths.get(ksPath))
+            : getClass().getResourceAsStream(ksPath)) {
 
-        log.info("Loading the keystore: {}", keystore());
-        if (ins == null) {
-          throw new IllegalStateException("Can't find the keystore: " + keystore());
-        }
-        KeyStore ks = KeyStore.getInstance("PKCS12");
-        ks.load(ins, keystorePassword().toCharArray());
-        return ks;
+      log.info("Loading the keystore: {}", keystore());
+      if (ins == null) {
+        throw new IllegalStateException("Can't find the keystore: " + keystore());
       }
+      KeyStore ks = KeyStore.getInstance("PKCS12");
+      ks.load(ins, keystorePassword().toCharArray());
+      return ks;
     } catch (IOException | GeneralSecurityException ex) {
       throw new IllegalStateException("Can't load the keystore: " + keystore(), ex);
     }
