@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
 
+
+## [1.1.4] - 2018-05-17
+### Changed
+- Moshi,Junit dependency update.
+- Max 64 chars allowed for common name.
+
+### Added
+- Added proper error code validation for download cert request.
+
 ## [1.1.3] - 2018-04-26
 ### Changed
 - Create `PKCS#1` private keys by default.
@@ -49,7 +58,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Cws client initial release.
 
 
-[Unreleased]: https://github.com/oneops/certs-client/compare/release-1.1.3...HEAD
+[Unreleased]: https://github.com/oneops/certs-client/compare/release-1.1.4...HEAD
+[1.1.4]: https://github.com/oneops/certs-client/compare/release-1.1.3...release-1.1.4
 [1.1.3]: https://github.com/oneops/certs-client/compare/release-1.1.2...release-1.1.3
 [1.1.2]: https://github.com/oneops/certs-client/compare/release-1.1.1...release-1.1.2
 [1.1.1]: https://github.com/oneops/certs-client/compare/release-1.1.0...release-1.1.1

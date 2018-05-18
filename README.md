@@ -13,7 +13,7 @@ Download [the latest JAR][1] or grab via Maven:
 <dependency>
   <groupId>com.oneops</groupId>
   <artifactId>certs-client</artifactId>
-  <version>1.1.3</version>
+  <version>1.1.4</version>
 </dependency>
 ```
 
