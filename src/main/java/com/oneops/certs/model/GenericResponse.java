@@ -17,6 +17,11 @@ public abstract class GenericResponse {
   @Json(name = "Error")
   public abstract String error();
 
+  /** Error code is optional and may not present in all the error responses. */
+  @Nullable
+  @Json(name = "ErrorCode")
+  public abstract Integer errorCode();
+
   @Nullable
   @Json(name = "ErrorMessage")
   public abstract String errorDetails();

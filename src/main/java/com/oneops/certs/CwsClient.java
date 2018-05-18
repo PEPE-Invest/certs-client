@@ -473,6 +473,8 @@ public abstract class CwsClient {
 
   /**
    * Returns the certificate data for certificate in the format requested in base64 encoded format.
+   * Since the certificate generation is asynchronous, this method will retry until the cert is
+   * available for download or it expires the timeout period, which is 120 seconds.
    *
    * @param req {@link DownloadReq}
    * @return {@link DownloadRes}
@@ -480,7 +482,7 @@ public abstract class CwsClient {
    *     the service.
    */
   public DownloadRes downloadCert(DownloadReq req) throws IOException {
-    return retry(() -> execRaw(certWebService.download(req)), 10);
+    return retry(() -> execRaw(certWebService.download(req)), 12);
   }
 
   /**
@@ -603,6 +605,14 @@ public abstract class CwsClient {
   }
 
   /**
+   * Returns true if the CWS error code is in [200..300), which means the request was successfully
+   * received, understood, and accepted.
+   */
+  private boolean isSuccessful(@Nullable Integer errorCode) {
+    return errorCode != null && errorCode >= 200 && errorCode < 300;
+  }
+
+  /**
    * A helper method to retry the given function with sleep.
    *
    * @param func function (Lambda) to execute.
@@ -620,7 +630,7 @@ public abstract class CwsClient {
     int i = 0;
     while (!res.success()) {
       String err = requireNonNull(res.errorDetails());
-      if (err.toLowerCase().contains("does not exist") || i >= maxCount) {
+      if (!isSuccessful(res.errorCode()) || i >= maxCount) {
         throw new CwsException(err);
       }
       log.info(err + ", retrying!");
