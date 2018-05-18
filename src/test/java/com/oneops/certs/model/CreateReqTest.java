@@ -31,7 +31,7 @@ class CreateReqTest {
     req = CreateReq.create("testAppId", "testapp.mycompany.com", "testTeamDL", emptyList());
     assertNotNull(req);
 
-    // Max common name us 64 chars
+    // Max common name is 64 chars
     char[] longCN = new char[65];
     Arrays.fill(longCN, 'x');
     assertThrows(
